@@ -1,0 +1,25 @@
+# This configuration is intended for development purpose, it's **your** responsibility to harden it for production
+name: receipto
+
+services:
+  app:
+    image: receipto
+    environment:
+      - POSTGRESQL_DB_URL=postgresql+asyncpg://receipto@postgresql:5432/receipto
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:5001/management/health/readiness
+      interval: 5s
+      timeout: 5s
+      retries: 40
+    depends_on:
+      postgresql:
+        condition: service_healthy
+
+  postgresql:
+    extends:
+      file: ./postgresql.yml
+      service: postgresql

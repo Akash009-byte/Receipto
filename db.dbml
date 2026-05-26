@@ -1,0 +1,21 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table spreadsheet {
+  id string [primary key]
+  spreadsheet_id [unique key] [note: 'this is from google spreedsheet']
+  name string
+  url string [note: 'can be null']
+  status bool [note: 'only one can be in true state at one time']
+  created_at timestamp
+}
+
+Table worksheet {
+  id string [primary key]
+  name string
+  end_row integer
+  status bool [note: 'only one can be in true state']
+  created_at timestamp
+}
+
+Ref: "worksheet"."id" < "spreadsheet"."id"

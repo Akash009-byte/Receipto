@@ -1,0 +1,3 @@
+deploy/dev/credentials.json
+deploy/dev/app.yml
+app/sheets_integration/credentials.json

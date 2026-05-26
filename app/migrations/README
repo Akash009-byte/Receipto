@@ -1,0 +1,14 @@
+Generic single-database configuration with an async dbapi.
+
+- Inside app/ dir.
+
+- Use below cmd to generate the scipts migration scripts
+
+
+```alembic revision --autogenerate -m "<msg>"
+```
+
+- To apply migration manually:-
+
+```alembic upgrade head
+```
