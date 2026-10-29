@@ -26,7 +26,7 @@ async def async_migration():
 # ===============================================
 
 # bind - The server socket to bind
-bind = "0.0.0.0:5001" 
+bind = "0.0.0.0:5001"
 
 # ===============================================
 #           Worker Processes
@@ -95,4 +95,3 @@ def on_exit(server):
     """
     Execute code just before exiting gunicorn.
     """
-

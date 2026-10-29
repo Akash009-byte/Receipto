@@ -1,1 +1,1 @@
-# AI Agents package for receipto 
+# AI Agents package for receipto

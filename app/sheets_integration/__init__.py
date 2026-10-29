@@ -1,1 +1,1 @@
-# Google Sheets integration package for receipto 
+# Google Sheets integration package for receipto

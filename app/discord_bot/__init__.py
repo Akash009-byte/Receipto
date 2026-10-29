@@ -1,1 +1,1 @@
-# Discord integration package 
+# Discord integration package

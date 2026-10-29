@@ -71,13 +71,13 @@ class WorksheetRepository:
         worksheet = await self.get_worksheet(worksheet_id)
         if not worksheet:
             return False
-        
+
         # First, deactivate all worksheets in the same spreadsheet
         spreadsheet_worksheets = await self.get_worksheets_by_spreadsheet(worksheet.spreadsheet_id)
         for ws in spreadsheet_worksheets:
             ws.status = False
-        
+
         # Then activate the specified one
         worksheet.status = True
         await self.session.commit()
-        return True 
+        return True

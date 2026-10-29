@@ -58,10 +58,10 @@ async def connect_to_spreadsheet(request: SpreadsheetConnectionRequest):
     """Connect to a Google Spreadsheet by ID."""
     try:
         result = await sheets_service.connect_to_spreadsheet(request.spreadsheet_id)
-        
+
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["error"])
-        
+
         return result
     except HTTPException:
         raise
@@ -74,10 +74,10 @@ async def connect_to_spreadsheet_by_name(request: SpreadsheetNameRequest):
     """Connect to a Google Spreadsheet by name."""
     try:
         result = await sheets_service.connect_to_spreadsheet_by_name(request.spreadsheet_name)
-        
+
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["error"])
-        
+
         return result
     except HTTPException:
         raise
@@ -90,10 +90,10 @@ async def create_new_spreadsheet(request: CreateSpreadsheetRequest):
     """Create a new Google Spreadsheet."""
     try:
         result = await sheets_service.create_new_spreadsheet(request.title)
-        
+
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["error"])
-        
+
         return result
     except HTTPException:
         raise
@@ -106,10 +106,10 @@ async def get_spreadsheet_info():
     """Get information about the current connected spreadsheet."""
     try:
         result = await sheets_service.get_spreadsheet_info()
-        
+
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["error"])
-        
+
         return result
     except HTTPException:
         raise
@@ -122,10 +122,10 @@ async def list_worksheets():
     """List all worksheets in the current spreadsheet."""
     try:
         result = await sheets_service.list_worksheets()
-        
+
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["error"])
-        
+
         return result
     except HTTPException:
         raise
@@ -138,14 +138,14 @@ async def create_worksheet(request: CreateWorksheetRequest):
     """Create a new worksheet in the current spreadsheet."""
     try:
         result = await sheets_service.create_worksheet(
-            request.title, 
-            request.rows, 
+            request.title,
+            request.rows,
             request.cols
         )
-        
+
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["error"])
-        
+
         return result
     except HTTPException:
         raise
@@ -163,10 +163,10 @@ async def create_worksheet_in_spreadsheet(request: CreateWorksheetInSpreadsheetR
             request.rows,
             request.cols
         )
-        
+
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["error"])
-        
+
         return result
     except HTTPException:
         raise
@@ -179,10 +179,10 @@ async def delete_worksheet(request: DeleteWorksheetRequest):
     """Delete a worksheet from the current spreadsheet."""
     try:
         result = await sheets_service.delete_worksheet(request.worksheet_name)
-        
+
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["error"])
-        
+
         return result
     except HTTPException:
         raise
@@ -195,13 +195,13 @@ async def get_worksheet_data(request: WorksheetDataRequest):
     """Get data from a specific worksheet."""
     try:
         result = await sheets_service.get_worksheet_data(
-            request.worksheet_name, 
+            request.worksheet_name,
             request.range_notation
         )
-        
+
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["error"])
-        
+
         return result
     except HTTPException:
         raise
@@ -219,13 +219,13 @@ async def write_receipt_data(request: WriteReceiptDataRequest):
             request.row,
             request.data
         )
-        
+
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["error"])
-        
+
         return result
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error writing receipt data: {e}")
-        raise HTTPException(status_code=500, detail="Failed to write receipt data") 
+        raise HTTPException(status_code=500, detail="Failed to write receipt data")

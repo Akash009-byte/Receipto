@@ -62,11 +62,11 @@ class SpreadsheetRepository:
         all_spreadsheets = await self.get_all_spreadsheets()
         for sheet in all_spreadsheets:
             sheet.status = False
-        
+
         # Then activate the specified one
         target_spreadsheet = await self.get_spreadsheet(spreadsheet_id)
         if target_spreadsheet:
             target_spreadsheet.status = True
             await self.session.commit()
             return True
-        return False 
+        return False

@@ -1,7 +1,7 @@
 """add spreadsheet and worksheet tables
 
 Revision ID: 48636a66d118
-Revises: 
+Revises:
 Create Date: 2025-08-17 17:17:04.446383
 
 """

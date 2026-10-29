@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI):
     await postgres.connect_postgresql()
 
     global discord_service_instance
-    if is_primary_worker():
+    if is_primary_worker() and os.getenv("DISCORD_BOT_TOKEN") and os.getenv("DUMP_CHANNEL_ID"):
         try:
             # Start Discord bot
             logger.info("Primary worker detected — starting Discord service...")
@@ -57,7 +57,7 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Failed to initialize Discord service: {e}")
     else:
-        logger.info("Secondary worker detected — skipping Discord service startup.")
+        logger.info("Discord integration disabled: configure its token and channel to enable it.")
 
     yield
 
@@ -71,6 +71,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+from sqlalchemy.exc import IntegrityError
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(IntegrityError)
+async def integrity_error_handler(request, exc):
+    return JSONResponse(status_code=409, content={"detail": "Record conflicts with existing data or references a missing parent"})
+
 
 origins = [
     "*",  # This configuration is intended for development purpose, it's **your** responsibility to harden it for production
@@ -88,3 +96,8 @@ app.include_router(api_router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=SERVER_PORT, reload=True)
+
+
+@app.get("/integrations/status")
+async def integration_status():
+    return {"openai": bool(os.getenv("OPENAI_API_KEY")), "discord": bool(os.getenv("DISCORD_BOT_TOKEN") and os.getenv("DUMP_CHANNEL_ID")), "google_sheets": bool(os.getenv("GOOGLE_SHEETS_CREDENTIALS") or os.getenv("GOOGLE_SHEETS_CREDENTIALS_FILE"))}

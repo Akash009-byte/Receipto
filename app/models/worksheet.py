@@ -12,9 +12,9 @@ class Worksheet(SQLModel, table=True):
     end_row: int = Field(description="Last row with data")
     status: bool = Field(default=False, description="Only one can be in true state")
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    
+
     # Foreign key to spreadsheet
     spreadsheet_id: str = Field(foreign_key="spreadsheet.id")
-    
+
     # Relationship to spreadsheet
-    spreadsheet: "Spreadsheet" = Relationship(back_populates="worksheets") 
+    spreadsheet: "Spreadsheet" = Relationship(back_populates="worksheets")

@@ -12,37 +12,37 @@ logger = logging.getLogger(__name__)
 
 class MessageEvents:
     """Handle all message-related Discord events."""
-    
+
     def __init__(self, bot):
         self.bot = bot
         self.image_downloader = ImageDownloader(download_folder="dump")
         self.receipt_processor = ReceiptProcessor()
         self.register_events()
-    
+
     def register_events(self):
         """Register all message events with the Discord bot."""
-        
+
         @self.bot.event
         async def on_message(message):
             """Fired when a message is sent in a channel that the bot can access."""
             await self.handle_message(message)
-        
+
         @self.bot.event
         async def on_message_edit(before, after):
             """Raised when a message is edited in a channel."""
             await self.handle_message_edit(before, after)
-        
+
         @self.bot.event
         async def on_message_delete(message):
             """Called when a message is deleted in a channel."""
             await self.handle_message_delete(message)
-    
+
     async def handle_message(self, message):
         """Handle incoming messages."""
         # Don't respond to our own messages
         if message.author == self.bot.user:
             return
-        
+
         # Basic message info
         logger.info(f"Message received in #{message.channel.name}: '{message.content}' from {message.author.name}")
 
@@ -65,7 +65,7 @@ class MessageEvents:
             logger.error(f"Error handling command: {e}")
             await message.channel.send("❌ Error handling command. Please try again.")
             return
-        
+
         # Check for attachments (images, files, etc.)
         if message.attachments:
             logger.info(f"{len(message.attachments)} attachment(s) found:")
@@ -73,14 +73,14 @@ class MessageEvents:
                 file_size_mb = attachment.size / (1024 * 1024)  # Convert to MB
                 logger.info(f"  {i}. {attachment.filename} ({file_size_mb:.2f} MB)")
                 logger.info(f"     URL: {attachment.url}")
-                
+
                 # Check if it's an image
                 if any(attachment.filename.lower().endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp']):
                     logger.info(f"     🖼️ Image detected: {attachment.width}x{attachment.height}")
                     await self.handle_image_attachment(message, attachment)
                 else:
                     logger.info(f"     📁 File attachment detected")
-        
+
         # Check for embeds (rich content like YouTube links, etc.)
         if message.embeds:
             logger.info(f"🔗 {len(message.embeds)} embed(s) found:")
@@ -89,44 +89,44 @@ class MessageEvents:
                 logger.info(f"     URL: {embed.url or 'No URL'}")
                 if embed.image:
                     logger.info(f"🖼️   Embedded image: {embed.image.url}")
-      
+
     async def handle_message_edit(self, before, after):
         """Handle message edits."""
         # Don't log our own message edits
         if before.author == self.bot.user:
             return
-        
+
         logger.info(f"Message edited in #{before.channel.name} by {before.author.name}")
         logger.info(f"  Before: '{before.content}'")
         logger.info(f"  After:  '{after.content}'")
-    
+
     async def handle_message_delete(self, message):
         """Handle message deletions."""
         # Don't log our own message deletions
         if message.author == self.bot.user:
             return
-        
-        logger.info(f"Message deleted in #{message.channel.name} by {message.author.name}: '{message.content}'") 
+
+        logger.info(f"Message deleted in #{message.channel.name} by {message.author.name}: '{message.content}'")
 
     async def handle_image_attachment(self, message, attachment):
         """Handle image attachments specifically - download and process with AI."""
         try:
             logger.info(f"🖼️   Processing image: {attachment.filename}")
-            
+
             # Step 1: Download the image
             file_path = await self.image_downloader.download_discord_attachment(
                 attachment, message.author.name
             )
-            
+
             if not file_path:
                 await message.channel.send(f"❌ Failed to download image: {attachment.filename}")
                 return
-            
+
             # Step 2: Process with AI (Receipt Processing)
             await message.channel.send(f"🤖 Processing receipt with AI... Please wait!")
-            
+
             receipt_data = await self.receipt_processor.process_receipt_image(file_path)
-            
+
             # Step 3: Send results back to Discord
             if "error" in receipt_data:
                 await message.channel.send(f"❌ AI Processing failed: {receipt_data['error']}")
@@ -175,16 +175,16 @@ class MessageEvents:
                 except Exception as e:
                     logger.error(f"Error writing receipt to sheet: {e}")
                     await message.channel.send("❌ Error writing receipt to Google Sheets.")
-            
+
             # Step 4: Cleanup if needed
             file_count = self.image_downloader.get_downloaded_files_count()
             if file_count > 50:  # Cleanup when we have too many files
                 self.image_downloader.cleanup_old_files(max_files=30)
-                
+
         except Exception as e:
             logger.error(f"Error processing image: {e}")
             await message.channel.send(f"❌ Error processing image: {str(e)}")
-    
+
     async def send_receipt_results(self, message, receipt_data, filename):
         """Send formatted receipt results to Discord."""
         try:
@@ -193,7 +193,7 @@ class MessageEvents:
             date = receipt_data.get('date', 'Unknown')
             total = receipt_data.get('total', 0.0)
             items_count = len(receipt_data.get('items', []))
-            
+
             # Create a nice summary
             summary = f"""
 🧾 **Receipt Processed Successfully!**
@@ -207,9 +207,9 @@ class MessageEvents:
 
 ✅ **Status:** {'Valid' if receipt_data.get('validation_passed', False) else 'Needs Review'}
             """.strip()
-            
+
             await message.channel.send(summary)
-            
+
             # If there are items, show them too
             if receipt_data.get('items') and len(receipt_data['items']) > 0:
                 items_text = "📝 **Items:**\n"
@@ -217,11 +217,11 @@ class MessageEvents:
                     name = item.get('name', 'Unknown item')
                     price = item.get('price', 0.0)
                     items_text += f"{i}. {name} - ${price}\n"
-                
+
                 await message.channel.send(items_text)
-            
+
             logger.info(f"✅ Successfully processed receipt for {message.author.name}")
-            
+
         except Exception as e:
             logger.error(f"Error sending receipt results: {e}")
-            await message.channel.send(f"✅ Receipt processed, but error formatting results: {str(e)}") 
+            await message.channel.send(f"✅ Receipt processed, but error formatting results: {str(e)}")

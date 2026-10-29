@@ -1,3 +1,20 @@
 deploy/dev/credentials.json
 deploy/dev/app.yml
 app/sheets_integration/credentials.json
+
+.env
+.env.*
+!.env.example
+**/credentials.json
+*.db
+__pycache__/
+node_modules/
+.venv/
+.DS_Store
+
+.local/
+webapp/dist/
+
+# Ignore development links as well as directories
+.venv
+node_modules

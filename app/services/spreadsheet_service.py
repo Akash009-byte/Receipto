@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from repository.spreadsheet_repository import SpreadsheetRepository
 from typing import List, Optional
 from fastapi import Depends
-from core.postgres import get_db 
+from core.postgres import get_db
 import logging
 import uuid
 
@@ -43,7 +43,7 @@ class SpreadsheetService:
         spreadsheet = await self.spreadsheetRepository.get_spreadsheet(spreadsheet_id)
         if not spreadsheet:
             return None
-        
+
         if name is not None:
             spreadsheet.name = name
         if url is not None:
@@ -54,7 +54,7 @@ class SpreadsheetService:
                 await self.spreadsheetRepository.set_active_spreadsheet(spreadsheet_id)
             else:
                 spreadsheet.status = status
-        
+
         updated_spreadsheet = await self.spreadsheetRepository.update_spreadsheet(spreadsheet)
         logger.info(f"Updated spreadsheet: {updated_spreadsheet.id}")
         return updated_spreadsheet
@@ -75,4 +75,4 @@ class SpreadsheetService:
         success = await self.spreadsheetRepository.set_active_spreadsheet(spreadsheet_id)
         if success:
             logger.info(f"Set active spreadsheet: {spreadsheet_id}")
-        return success 
+        return success

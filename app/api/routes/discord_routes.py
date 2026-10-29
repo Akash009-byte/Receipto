@@ -26,10 +26,10 @@ class MessageRequest(BaseModel):
 async def send_message(request: MessageRequest):
     """Send a message to Discord #dump channel."""
     discord_service = get_discord_service()
-    
+
     if not discord_service or not discord_service.is_connected():
         raise HTTPException(status_code=503, detail="Discord service not connected")
-    
+
     try:
         success = await discord_service.send_message(request.message)
         if success:
@@ -44,10 +44,10 @@ async def send_message(request: MessageRequest):
 async def get_status():
     """Get Discord service status."""
     discord_service = get_discord_service()
-    
+
     if not discord_service:
         return {"status": "not_initialized"}
-    
+
     return {
         "status": "connected" if discord_service.is_connected() else "disconnected"
-    } 
+    }

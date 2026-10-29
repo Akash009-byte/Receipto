@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 from fastapi import APIRouter, HTTPException, Depends
 from services.spreadsheet_service import SpreadsheetService
 from models.spreadsheet import Spreadsheet
@@ -30,7 +31,7 @@ def get_spreadsheet_service(db: AsyncSession = Depends(get_db)) -> SpreadsheetSe
 
 @router.post("", response_model=Spreadsheet)
 async def create_spreadsheet(
-    request: CreateSpreadsheetRequest, 
+    request: CreateSpreadsheetRequest,
     spreadsheet_service: SpreadsheetService = Depends(get_spreadsheet_service)
 ):
     """Create a new spreadsheet record."""
@@ -40,13 +41,15 @@ async def create_spreadsheet(
             name=request.name,
             url=request.url
         )
+    except IntegrityError:
+        raise
     except Exception as e:
         logger.error(f"Error creating spreadsheet: {e}")
         raise HTTPException(status_code=500, detail="Failed to create spreadsheet")
 
 @router.get("/{spreadsheet_id}", response_model=Spreadsheet)
 async def get_spreadsheet(
-    spreadsheet_id: str, 
+    spreadsheet_id: str,
     spreadsheet_service: SpreadsheetService = Depends(get_spreadsheet_service)
 ):
     """Get a spreadsheet by ID."""
@@ -57,7 +60,7 @@ async def get_spreadsheet(
 
 @router.get("/google/{google_spreadsheet_id}", response_model=Spreadsheet)
 async def get_spreadsheet_by_google_id(
-    google_spreadsheet_id: str, 
+    google_spreadsheet_id: str,
     spreadsheet_service: SpreadsheetService = Depends(get_spreadsheet_service)
 ):
     """Get a spreadsheet by Google Spreadsheet ID."""
@@ -92,7 +95,7 @@ async def update_spreadsheet(
 
 @router.delete("/{spreadsheet_id}")
 async def delete_spreadsheet(
-    spreadsheet_id: str, 
+    spreadsheet_id: str,
     spreadsheet_service: SpreadsheetService = Depends(get_spreadsheet_service)
 ):
     """Delete a spreadsheet."""
@@ -120,4 +123,4 @@ async def set_active_spreadsheet(
     success = await spreadsheet_service.set_active_spreadsheet(spreadsheet_id)
     if not success:
         raise HTTPException(status_code=404, detail="Spreadsheet not found")
-    return {"message": f"Spreadsheet {spreadsheet_id} set as active"} 
+    return {"message": f"Spreadsheet {spreadsheet_id} set as active"}

@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 from fastapi import APIRouter, HTTPException, Depends
 from services.worksheet_service import WorksheetService
 from models.worksheet import Worksheet
@@ -18,6 +19,7 @@ class CreateWorksheetRequest(BaseModel):
     name: str
     spreadsheet_id: str
     end_row: int = 0
+    sync_google: bool = True
 
 class UpdateWorksheetRequest(BaseModel):
     name: Optional[str] = None
@@ -30,7 +32,7 @@ def get_worksheet_service(db: AsyncSession = Depends(get_db)) -> WorksheetServic
 
 @router.post("", response_model=Worksheet)
 async def create_worksheet(
-    request: CreateWorksheetRequest, 
+    request: CreateWorksheetRequest,
     worksheet_service: WorksheetService = Depends(get_worksheet_service)
 ):
     """Create a new worksheet record."""
@@ -38,15 +40,20 @@ async def create_worksheet(
         return await worksheet_service.create_worksheet(
             name=request.name,
             spreadsheet_id=request.spreadsheet_id,
-            end_row=request.end_row
+            end_row=request.end_row,
+            sync_google=request.sync_google
         )
+    except HTTPException:
+        raise
+    except IntegrityError:
+        raise
     except Exception as e:
         logger.error(f"Error creating worksheet: {e}")
         raise HTTPException(status_code=500, detail="Failed to create worksheet")
 
 @router.get("/{worksheet_id}", response_model=Worksheet)
 async def get_worksheet(
-    worksheet_id: str, 
+    worksheet_id: str,
     worksheet_service: WorksheetService = Depends(get_worksheet_service)
 ):
     """Get a worksheet by ID."""
@@ -89,7 +96,7 @@ async def update_worksheet(
 
 @router.delete("/{worksheet_id}")
 async def delete_worksheet(
-    worksheet_id: str, 
+    worksheet_id: str,
     worksheet_service: WorksheetService = Depends(get_worksheet_service)
 ):
     """Delete a worksheet."""
@@ -118,4 +125,4 @@ async def set_active_worksheet(
     success = await worksheet_service.set_active_worksheet(worksheet_id)
     if not success:
         raise HTTPException(status_code=404, detail="Worksheet not found")
-    return {"message": f"Worksheet {worksheet_id} set as active"} 
+    return {"message": f"Worksheet {worksheet_id} set as active"}

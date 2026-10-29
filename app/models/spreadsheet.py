@@ -10,6 +10,6 @@ class Spreadsheet(SQLModel, table=True):
     url: Optional[str] = Field(default=None, description="URL to the spreadsheet")
     status: bool = Field(default=False, description="Only one can be in true state at one time")
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    
+
     # Relationship to worksheets
-    worksheets: List["Worksheet"] = Relationship(back_populates="spreadsheet") 
+    worksheets: List["Worksheet"] = Relationship(back_populates="spreadsheet", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
